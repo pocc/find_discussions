@@ -31,27 +31,11 @@ It's also possible to limit it to 100 instead of default 25
 'use strict';
 //const snoowrap = require('snoowrap');
 //require('dotenv').config()
-import fetch from 'node-fetch';
 import {forumPost, redditPost} from 'index';
-import {generateLine, fetchGetOptions} from './utils.js';
-import {settings} from './settings.js';
+import {fetchGetOptions} from './utils.js';
 
-(async (): Promise<void> => {
-    const url = "https://apnews.com/article/election-2020-joe-biden-north-america-national-elections-elections-7200c2d4901d8e47f1302954685a737f"
-    const limit = settings.limit // assume limit is >0
-    let type = settings.types[0]
-    if (settings.types.length > 1) {
-        type = "all"
-    }
-    const postsData: forumPost[] = await search_reddit(url, type, limit, "top")
-    let htmlLinks: string[] = []
-    for (const postData of postsData) {
-        htmlLinks.push(generateLine(postData));
-    }
-    console.log(htmlLinks)
-})();
 
-async function search_reddit(url: String, type: String, limit: number, sort: String): Promise<forumPost[]> {
+export async function search_reddit(url: String, type: String, limit: number, sort: String): Promise<forumPost[]> {
     // It would be nice to limit in search query how many to return
     const resp = await fetch(`https://www.reddit.com/search/?q=url%3A${url}&type=${type}&sort=${sort}`, fetchGetOptions as any);
     const pagetext = await resp.text()

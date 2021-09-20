@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
       // project options
+      "module": "ES2020",
       "lib": [
         "ESNext",
         "dom",

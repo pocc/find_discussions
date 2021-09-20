@@ -34,23 +34,9 @@ fetch("https://uj5wyc0l7x-dsn.algolia.net/1/indexes/Item_production/query?x-algo
   "mode": "cors"
 });
 */
-import fetch from 'node-fetch';
-import {forumPost, HNPost, NFResponse, HNStory} from 'index';
-import { generateLine } from './utils.js';
-import { settings } from './settings.js';
+import {forumPost, HNPost, HNStory} from 'index';
 
-(async (): Promise<void> => {
-    const url = "https://blog.sigplan.org/"
-    const resp = await searchHN(url);
-    const forumPosts = await transformResp(resp);
-    const foundDiscussionsHTML = forumPosts.map((i) => {return generateLine(i)})
-    console.log(foundDiscussionsHTML)
-})();
-
-
-async function searchHN(url: string): Promise<NFResponse> {
-    const limit = settings.limit
-    let typesAry = settings.types
+export async function searchHN(url: string, typesAry: string[], limit: number): Promise<forumPost[]> {
     if (typesAry.includes("post")) {
         const i = typesAry.indexOf("post")
         typesAry[i] = "story" // This is what a post is called on HN
@@ -75,24 +61,19 @@ async function searchHN(url: string): Promise<NFResponse> {
         "method": "POST",
         "mode": "cors"
       } as any);
-    return resp;
-}
-
-async function transformResp(resp: NFResponse): Promise<forumPost[]> {
-    const body = await resp.json() as HNPost;
-    let HNPosts: forumPost[] = []
-    // Right now, we're only showing stories
-    let stories = body.hits as HNStory[];
-    for (const hit of stories) {
-        HNPosts.push({
-            type: "post",
-            created_date: hit.created_at.substr(0,10),
-            url: "https://news.ycombinator.com/item?id=" + hit["objectID"],
-            title: hit.title,
-            comment_count: hit.num_comments,
-            score: hit.points
-        });
-    }
-    return HNPosts
-
+      const body = await resp.json() as HNPost;
+      let HNPosts: forumPost[] = []
+      // Right now, we're only showing stories
+      let stories = body.hits as HNStory[];
+      for (const hit of stories) {
+          HNPosts.push({
+              type: "post",
+              created_date: hit.created_at.substr(0,10),
+              url: "https://news.ycombinator.com/item?id=" + hit["objectID"],
+              title: hit.title,
+              comment_count: hit.num_comments,
+              score: hit.points
+          });
+      }
+      return HNPosts
 }

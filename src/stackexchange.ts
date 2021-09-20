@@ -24,32 +24,18 @@ with the possibility of using 5 quotas.
 */
 
 'use strict';
-import fetch from 'node-fetch';
-import {fetchGetOptions, generateLine} from './utils.js'
-import {settings} from './settings.js'
+import {fetchGetOptions} from './utils.js'
 import { SEResp, forumPost, SEAnswer, SEQuestion } from 'index.js';
 
 
-(async () => {
-    const url = "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction"
-    const sort = "activity" // not sure what other sort types there are
-    const stackExchangeSites = ["stackoverflow"]
-    const types = ["question", "answer"];
-    const postsData = await search_stack_exchange(url, types, settings.limit, sort, stackExchangeSites)
-    let htmlLinks: string[] = []
-    for (const postData of postsData) {
-        htmlLinks.push(generateLine(postData));
-    }
-    console.log(htmlLinks)
-})();
-
-async function search_stack_exchange(url: string, types: string[], limit: number, sort: string, subsites: string[]): Promise<forumPost[]> {
+export async function search_stack_exchange(url: string, types: string[], limit: number, sort: string, subsites: string[]): Promise<forumPost[]> {
     const urlBase = "https://api.stackexchange.com/2.3/search/excerpts?order=desc"
     let counter = 0;
     let posts: forumPost[] = []
     for (const subsite of subsites) {
         if (counter == limit || limit < 1) break;
-        const resp = await fetch(`${urlBase}&sort=${sort}&url=${url}&site=${subsite}`, fetchGetOptions as any);
+        const fetchURL = `${urlBase}&sort=${sort}&url=${encodeURIComponent(url)}&site=${subsite}`
+        const resp = await fetch(fetchURL, fetchGetOptions as any);
         const stackExchangeResp = await resp.json() as SEResp;
         for (const item of stackExchangeResp.items) {
             if (counter == limit) break;
