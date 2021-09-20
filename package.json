@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "node-fetch": "^3.0.0"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^16.9.4"
+  }
+}
