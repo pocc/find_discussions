@@ -1,4 +1,6 @@
-export const settings = {
+import {Settings} from 'index';
+
+export const settings: Settings = {
     "types": ["post"],
     "limit": 4
 }

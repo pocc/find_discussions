@@ -33,7 +33,7 @@ It's also possible to limit it to 100 instead of default 25
 //require('dotenv').config()
 import fetch from 'node-fetch';
 import {forumPost, redditPost} from 'index';
-import {generateLine} from './utils.js';
+import {generateLine, fetchGetOptions} from './utils.js';
 import {settings} from './settings.js';
 
 (async (): Promise<void> => {
@@ -53,25 +53,7 @@ import {settings} from './settings.js';
 
 async function search_reddit(url: String, type: String, limit: number, sort: String): Promise<forumPost[]> {
     // It would be nice to limit in search query how many to return
-    const resp = await fetch(`https://www.reddit.com/search/?q=url%3A${url}&type=${type}&sort=${sort}`, {
-    "headers": {
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "accept-language": "en-US,en;q=0.9",
-        "cache-control": "no-cache",
-        "pragma": "no-cache",
-        "sec-ch-ua": "\"Google Chrome\";v=\"93\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"93\"",
-        "sec-ch-ua-mobile": "?0",
-        "sec-fetch-dest": "document",
-        "sec-fetch-mode": "navigate",
-        "sec-fetch-site": "same-origin",
-        "sec-fetch-user": "?1",
-        "upgrade-insecure-requests": "1",
-    },
-    "referrerPolicy": "strict-origin-when-cross-origin",
-    "body": null,
-    "method": "GET",
-    "mode": "cors"
-    } as any);
+    const resp = await fetch(`https://www.reddit.com/search/?q=url%3A${url}&type=${type}&sort=${sort}`, fetchGetOptions as any);
     const pagetext = await resp.text()
     const match = /window\.___r = (.*);<\/script>/g.exec(pagetext)
     let posts: forumPost[] = []
@@ -82,15 +64,15 @@ async function search_reddit(url: String, type: String, limit: number, sort: Str
             if (limit == counter) {
                 break
             }
-            const redditPostData: redditPost = data['posts']['models'][page]
-            const created_date = new Date(redditPostData['created']).toISOString().substring(0,10)
+            const redditPostData: redditPost = data.posts.models[page]
+            const created_date = new Date(redditPostData.created).toISOString().substring(0,10)
             posts.push({
                 type: "post",
                 created_date: created_date,
-                title: redditPostData['title'],
-                url: redditPostData['permalink'],
-                score: redditPostData['score'],
-                comment_count: redditPostData['numComments']
+                title: redditPostData.title,
+                url: redditPostData.permalink,
+                score: redditPostData.score,
+                comment_count: redditPostData.numComments
             })
             counter += 1;
         }

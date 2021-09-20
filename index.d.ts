@@ -8,6 +8,11 @@ export type forumPost = {
     comment_count: number
 }
 
+export type Settings = {
+    types: string[],
+    limit: number
+}
+
 // node-fetch response
 export type NFResponse = import("./node_modules/node-fetch/@types/index").Response
 
@@ -99,6 +104,7 @@ export interface redditPost {
 
 // Taken via inspecting https://hn.algolia.com/?dateRange=all&page=0&prefix=true&query=https%3A%2F%2Fblog.sigplan.org%2F&sort=byPopularity&type=all
 // HNComment and HNStory are slightly different in which values are allowed to be null
+// HN => Hacker News
 export type HNPost = {
     hits: (HNComment | HNStory)[];
     nbHits: number;
@@ -218,3 +224,38 @@ export interface HNComment {
         filters: number;
     };
 }
+
+// SE => Stack Exchange
+export interface SEResp {
+    items: (SEQuestion | SEAnswer)[];
+    has_more: boolean;
+    quota_max: number;
+    quota_remaining: number;
+}
+
+export type SEPostType = "question" | "answer"
+
+export interface SEPost {
+    tags: (string)[];
+    question_score: number;
+    is_accepted: boolean;
+    is_answered: boolean;
+    question_id: number;
+    item_type: SEPostType;
+    score: number;
+    last_activity_date: number;
+    creation_date: number;
+    body: string;
+    excerpt: string;
+    title: string;
+}
+
+export interface SEQuestion extends SEPost {
+    has_accepted_answer: boolean;
+    answer_count: number;
+}
+
+export interface SEAnswer extends SEPost {
+    answer_id: number;
+}
+  
