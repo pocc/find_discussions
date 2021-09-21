@@ -9,7 +9,11 @@
         "build/reddit.js",
         "build/stackexchange.js",
         "build/settings.js",
-        "build/utils.js"
+        "build/utils.js",
+        "media/hackernews.ico",
+        "media/reddit.ico",
+        "media/stackexchange.ico",
+        "media/stackovenflow.ico"
     ],
     "manifest_version": 2,
     "author": "Ross Jacobs",

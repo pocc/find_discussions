@@ -12,7 +12,7 @@ This chrome/firefox extension will find related discussions of your current url 
 ### Required
 
 * [X] Indicate with emoji if stackoverflow answer is accepted (10m)
-* [ ] Indicate with image what platform this is with svg (right before link) (30min)
+* [X] Indicate with image what platform this is with svg (right before link) (30min)
 * [ ] Indicate with emoji whether it's an question, answer, post, or comment (15m)
 * [ ] Use images of upvote/
 * [ ] Filter out stack overflow questions and answers that have the same question_id (prefer answer) (15m)
@@ -25,12 +25,15 @@ This chrome/firefox extension will find related discussions of your current url 
   * [ ] Convert HTML from `<p>` to table so it's aligned (30m)
   * [ ] Create an checkbox on the popup which will ensure that it won't show on this domain (60m)
 * [ ] Add option for URL regex to apply to results
+* [ ] Default disable bare (sub)domains without a path, allow option to enable.
+        Most domains like stackoverflow.com aren't as interesting as paths on the website.
 
 ### Nice to have
 
-* [ ] Add support for twitter (120m)
-* [ ] Add support for wikipedia (120m)
-* [ ] Add support for general google links (120m)
+* [ ] Add support for twitter (240m)
+* [ ] Add support for wikipedia (240m)
+* [ ] Add support for general google links (240m)
+* [ ] Add support for github READMEs/issues/pull requests (240m)
 
 ## Settings
 
