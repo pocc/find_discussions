@@ -1,11 +1,13 @@
 // d.ts file for this project
 export type forumPost = {
-    created_date: string,
-    title: string,
-    type: "post" | "comment" | "question" | "answer"
-    url: string,
-    score: number
-    comment_count: number
+    created_date: string;
+    source: "hackernews" | "reddit" | "stackexchange"
+    title: string;
+    type: "post" | "comment" | "question" | "answer";
+    url: string;
+    score: number;
+    comment_count: number;
+    is_accepted_answer: boolean;
 }
 
 export type Settings = {

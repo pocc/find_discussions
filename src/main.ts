@@ -1,3 +1,6 @@
+/* Main content script for extension
+ * 2021 Ross Jacobs 
+ */
 (async () => {
     // Dynamic imports per https://stackoverflow.com/a/53033388/
     const hnJsUrl = chrome.runtime.getURL("build/hn.js");

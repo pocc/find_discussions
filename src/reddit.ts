@@ -1,4 +1,6 @@
 /*
+// 2021 Ross Jacobs
+
 via https://www.makeuseof.com/tag/right-way-search-reddit/
 
 ### **How to Search Reddit Using Modifiers and Operators**
@@ -52,11 +54,13 @@ export async function search_reddit(url: String, type: String, limit: number, so
             const created_date = new Date(redditPostData.created).toISOString().substring(0,10)
             posts.push({
                 type: "post",
+                source: "reddit",
                 created_date: created_date,
                 title: redditPostData.title,
                 url: redditPostData.permalink,
                 score: redditPostData.score,
-                comment_count: redditPostData.numComments
+                comment_count: redditPostData.numComments,
+                is_accepted_answer: false,  // Only for Stack Exchange answers
             })
             counter += 1;
         }

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// 2021 Ross Jacobs
 // Access hacker news using Algolia
 
 // This link https://hn.algolia.com/?dateRange=all&page=0&prefix=true&query=https%3A%2F%2Fblog.sigplan.org%2F&sort=byPopularity&type=all
@@ -68,11 +69,13 @@ export async function searchHN(url: string, typesAry: string[], limit: number): 
       for (const hit of stories) {
           HNPosts.push({
               type: "post",
+              source: "hackernews",
               created_date: hit.created_at.substr(0,10),
               url: "https://news.ycombinator.com/item?id=" + hit["objectID"],
               title: hit.title,
               comment_count: hit.num_comments,
-              score: hit.points
+              score: hit.points,
+              is_accepted_answer: false  // Accepted answer is for stack overflow
           });
       }
       return HNPosts

@@ -1,3 +1,4 @@
+// 2021 Ross Jacobs
 import {Settings} from 'index';
 
 export const settings: Settings = {

@@ -1,4 +1,6 @@
 /*
+// 2021 Ross Jacobs
+
 This will search for this url:https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
 
 Using the API, https://api.stackexchange.com/docs/excerpt-search, but will only search stackoverflow.
@@ -51,11 +53,13 @@ export async function search_stack_exchange(url: string, types: string[], limit:
                 }
                 posts.push({
                     type: item.item_type,
+                    source: "stackexchange",
                     created_date: created_date,
                     title: item.title,
                     url: url,
                     score: item.score,
-                    comment_count: comment_count
+                    comment_count: comment_count,
+                    is_accepted_answer: item.is_accepted
                 })
                 counter += 1
             }

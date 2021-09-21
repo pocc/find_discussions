@@ -1,11 +1,16 @@
+// 2021 Ross Jacobs
 import { forumPost } from "index";
 
 export function generateLine(fp: forumPost): string {
     const score = intToString(fp.score)
-    const scoreStr = `<span title="This ${fp.type} has ${score} points"><b>${score}</b> 👍</span>`
+    const scoreStr = `<span title="This ${fp.type} has ${score} points"><b>${score}</b>👍</span>`
     const commentCount = intToString(fp.comment_count)
-    const commentStr = `<span title="This ${fp.type} has ${commentCount} comments"><b>${commentCount}</b> 💬</span>`
-    return `<p>${fp.created_date} ${scoreStr} ${commentStr} <a href="${fp.url}">${fp.title}</a></p>`
+    let answer_emoji = "";
+    if (fp.source === "stackexchange") {
+        answer_emoji = "✅";
+    } 
+    const commentStr = `<span title="This ${fp.type} has ${commentCount} comments"><b>${commentCount}</b>💬</span>`
+    return `<p>${fp.created_date} ${scoreStr} ${commentStr} <a href="${fp.url}">${answer_emoji}${fp.title}</a></p>`
 }
 
 // copied from https://stackoverflow.com/questions/10599933/, assume no post/comment will have >= 1T points
