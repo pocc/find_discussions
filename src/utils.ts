@@ -3,7 +3,7 @@ import { forumPost } from "index";
 
 export function generateLine(fp: forumPost): string {
     const site_ico_path = chrome.runtime.getURL(`media/${fp.source}.ico`)
-    const site_ico = `<img src="${site_ico_path}" alt="${fp.source}" width="12px" height="12px"> `
+    const site_ico = `<img src="${site_ico_path}" alt="${fp.source}" width="16px" height="16px">`
     const score = intToString(fp.score)
     const scoreStr = `<span title="This ${fp.type} has ${score} points"><b>${score}</b>👍</span>`
     const commentCount = intToString(fp.comment_count)
@@ -12,7 +12,9 @@ export function generateLine(fp: forumPost): string {
         answer_emoji = "✅";
     }
     const commentStr = `<span title="This ${fp.type} has ${commentCount} comments"><b>${commentCount}</b>💬</span>`
-    return `<p>${site_ico}${fp.created_date} ${scoreStr} ${commentStr} <a href="${fp.url}">${answer_emoji}${fp.title}</a></p>`
+    const type_svg_path = chrome.runtime.getURL(`media/${fp.type}.svg`)
+    const type_svg = `<img src="${type_svg_path}" alt="${fp.type}" width="16px" height="16px">`
+    return `<p>${site_ico} ${type_svg} ${fp.created_date} ${scoreStr} ${commentStr} <a href="${fp.url}">${answer_emoji}${fp.title}</a></p>`
 }
 
 // copied from https://stackoverflow.com/questions/10599933/, assume no post/comment will have >= 1T points

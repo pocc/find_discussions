@@ -13,7 +13,11 @@
         "media/hackernews.ico",
         "media/reddit.ico",
         "media/stackexchange.ico",
-        "media/stackovenflow.ico"
+        "media/post.svg",
+        "media/story.svg",
+        "media/comment.svg",
+        "media/question.svg",
+        "media/answer.svg"
     ],
     "manifest_version": 2,
     "author": "Ross Jacobs",

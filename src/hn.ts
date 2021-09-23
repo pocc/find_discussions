@@ -38,11 +38,7 @@ fetch("https://uj5wyc0l7x-dsn.algolia.net/1/indexes/Item_production/query?x-algo
 import {forumPost, HNPost, HNStory} from 'index';
 
 export async function searchHN(url: string, typesAry: string[], limit: number): Promise<forumPost[]> {
-    if (typesAry.includes("post")) {
-        const i = typesAry.indexOf("post")
-        typesAry[i] = "story" // This is what a post is called on HN
-    }
-    const types = `["${typesAry.join('", "')}"]`
+    const types = `"${typesAry.join('", "')}"`
     const resp = await fetch("https://uj5wyc0l7x-dsn.algolia.net/1/indexes/Item_production/query?x-algolia-agent=Algolia%20for%20JavaScript%20(4.0.2)%3B%20Browser%20(lite)&x-algolia-api-key=8ece23f8eb07cd25d40262a1764599b1&x-algolia-application-id=UJ5WYC0L7X", {
         "headers": {
           "accept": "*\/*",
@@ -58,7 +54,7 @@ export async function searchHN(url: string, typesAry: string[], limit: number): 
         },
         "referrer": "https://hn.algolia.com/",
         "referrerPolicy": "strict-origin-when-cross-origin",
-        "body": `{"query":"${url}","analyticsTags":["web"],"page":0,"hitsPerPage":${limit},"minWordSizefor1Typo":4,"minWordSizefor2Typos":8,"advancedSyntax":true,"ignorePlurals":false,"clickAnalytics":true,"minProximity":1,"numericFilters":[],"tagFilters":[${types},[]],"typoTolerance":true,"queryType":"prefixLast","restrictSearchableAttributes":["title","comment_text","url","story_text","author"],"getRankingInfo":true}`,
+        "body": `{"query":"\\\"${url}\\\"","analyticsTags":["web"],"page":0,"hitsPerPage":${limit},"minWordSizefor1Typo":4,"minWordSizefor2Typos":8,"advancedSyntax":true,"ignorePlurals":false,"clickAnalytics":true,"minProximity":1,"numericFilters":[],"tagFilters":[${types},[]],"typoTolerance":true,"queryType":"prefixLast","restrictSearchableAttributes":["title","comment_text","url","story_text","author"],"getRankingInfo":true}`,
         "method": "POST",
         "mode": "cors"
       } as any);

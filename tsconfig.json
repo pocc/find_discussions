@@ -32,7 +32,7 @@
       "noUnusedLocals": true, // Report errors on unused local variables.
       "noUnusedParameters": true // Report errors on unused parameters in functions
     },
-    "include": ["./src/*.ts", "index.d.ts", "index.d.ts"],
+    "include": ["./src/*.ts", "index.d.ts"],
     "exclude": [
       "node_modules/**/*"
     ]

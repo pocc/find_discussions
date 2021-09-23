@@ -3,7 +3,7 @@ export type forumPost = {
     created_date: string;
     source: "hackernews" | "reddit" | "stackexchange"
     title: string;
-    type: "post" | "comment" | "question" | "answer";
+    type: "post" | "comment" | "story" | "question" | "answer";
     url: string;
     score: number;
     comment_count: number;

@@ -17,7 +17,7 @@
     let all_results: any = [];
     console.log("Reading info for url:" + url)
     try {
-        const hn_results = await hn.searchHN(url, ["post"], limit);
+        const hn_results = await hn.searchHN(url, ["story"], limit);
         all_results = all_results.concat(hn_results)
     } catch(err) { console.log("Unable to fetch hacker news results." + err) }
     try {

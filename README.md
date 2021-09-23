@@ -13,7 +13,7 @@ This chrome/firefox extension will find related discussions of your current url 
 
 * [X] Indicate with emoji if stackoverflow answer is accepted (10m)
 * [X] Indicate with image what platform this is with svg (right before link) (30min)
-* [ ] Indicate with emoji whether it's an question, answer, post, or comment (15m)
+* [X] Indicate with emoji whether it's an question, answer, post, or comment (15m)
 * [ ] Use images of upvote/
 * [ ] Filter out stack overflow questions and answers that have the same question_id (prefer answer) (15m)
 * [ ] Add 24h caching for a URL and save to local storage (30m)
