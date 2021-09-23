@@ -1,9 +1,18 @@
 {
     "content_scripts": [{
         "matches": ["*://*/*"],
-        "js": ["build/main.js"],
+        "js": ["build/content_script.js"],
         "run_at": "document_end"
     }],
+    "icons": {
+        "16": "media/logo_16.png",
+        "48": "media/logo_48.png",
+        "128": "media/logo_128.png"
+    },
+    "browser_action": {
+        "default_popup": "build/popup.html",
+        "default_title": "Backlinks to discussions"
+    },
     "web_accessible_resources": [
         "build/hn.js",
         "build/reddit.js",
@@ -17,9 +26,10 @@
         "media/story.svg",
         "media/comment.svg",
         "media/question.svg",
-        "media/answer.svg"
+        "media/answer.svg"    
     ],
     "manifest_version": 2,
+    "permissions": ["tabs"],
     "author": "Ross Jacobs",
     "name": "Find Discussions",
     "description": "Browser extension to find discussions of your current page",

@@ -1,7 +1,22 @@
 /* Main content script for extension
  * 2021 Ross Jacobs 
  */
-(async () => {
+
+document.addEventListener("DOMContentLoaded", async (event) => {
+    console.log("FIND_DISCUSSIONS_EXTN: started with event", event)
+    const queryOptions = { active: true, currentWindow: true };
+    chrome.tabs.query(queryOptions, async (tabs) => {
+        const tab = tabs[0];
+        const url = tab.url || tab.pendingUrl;  // If url isn't available, page is still loading
+        if (url) {
+            await runExtn(url)
+        } else {
+            console.error(`Tab url for tab ID ${tab.id} not found`)
+        }
+    });
+});
+    
+async function runExtn(url: string) {
     // Dynamic imports per https://stackoverflow.com/a/53033388/
     const hnJsUrl = chrome.runtime.getURL("build/hn.js");
     const hn = await import(hnJsUrl);
@@ -13,7 +28,6 @@
     const utils = await import(utilsJsUrl);
 
     const limit = 3 // sane default limit for requests
-    const url = window.location.href;
     let all_results: any = [];
     console.log("Reading info for url:" + url)
     try {
@@ -33,6 +47,8 @@
     // Choose top 3 results by comments, descending order
     all_results = all_results.sort((a: any, b: any) => {return b.comment_count - a.comment_count});
     const top3_results = all_results.slice(0, 3);
+    await chrome.browserAction.setBadgeText({text: top3_results.length.toString()});
+    await chrome.browserAction.setBadgeBackgroundColor({color: "#666666"});
     let newHTML = ""
     for (const r of top3_results) {
         newHTML += utils.generateLine(r);
@@ -40,6 +56,11 @@
 
     const div = document.createElement("div");
     div.innerHTML = newHTML
-    div.setAttribute('style', "margin-left: 10%;")
-    document.body.insertBefore(div, document.body.firstChild);
-})();
+    document.body.appendChild(div);
+    // You can't open a link from a popup, so ask chrome to open new tabs
+    const links = document.getElementsByTagName("a");
+    for (let i=0; i < links.length; i++) {
+        const ln = links[i];
+        ln.onclick = () => {chrome.tabs.create({active: false, url: ln.href});};
+    }
+}
