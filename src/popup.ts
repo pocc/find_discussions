@@ -7,8 +7,11 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     const queryOptions = { active: true, currentWindow: true };
     chrome.tabs.query(queryOptions, async (tabs) => {
         const tab = tabs[0];
-        const url = tab.url || tab.pendingUrl;  // If url isn't available, page is still loading
-        if (url) {
+        const fullUrl = tab.url || tab.pendingUrl;  // If url isn't available, page is still loading
+        if (fullUrl) {
+            // remove search and heash from url
+            const urlObj = new URL(fullUrl)
+            const url = urlObj.protocol+'//'+urlObj.host+urlObj.pathname
             await runExtn(url)
         } else {
             console.error(`Tab url for tab ID ${tab.id} not found`)
@@ -53,6 +56,8 @@ async function runExtn(url: string) {
     for (const r of top3_results) {
         newHTML += utils.generateLine(r);
     }
+    const thead = `<thead><th>Site</th><th>Date</th><th>👍</th><th>💬</th><th>Link</th></thead>`
+    newHTML = `<table>${thead}<tbody>${newHTML}</tbody></table>`
 
     const div = document.createElement("div");
     div.innerHTML = newHTML

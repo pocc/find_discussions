@@ -18,10 +18,14 @@ This chrome/firefox extension will find related discussions of your current url 
 * [X] Move API requests from content script to background script (60m)
   * > moved it to popup script, which does the same thing from CORS perspective
 * [X] Filter out stack overflow questions and answers that have the same question_id (prefer answer) (15m)
+  * [ ] Convert HTML from `<p>` to table so it's aligned (30m)
+* [ ] Send a chrome notification on links with > 10 comments on Reddit or Hacker News or > 5 votes on Stack Overflow
+* [ ] Update badge on page load
+* [ ] Cache results in localstorage with key of date.
+* [ ] Limit number of elements through UI rather than pre-limit it in requests
 * [ ] Use react for components (120m)
   * [ ] Have textbox for number of elements to show 0 for ∞ (30m)
   * [ ] Plus sign at bottom to show 1 more result (30m)
-  * [ ] Convert HTML from `<p>` to table so it's aligned (30m)
   * [ ] Create an checkbox on the popup which will ensure that it won't show on this domain (60m)
 * [ ] Add option for URL regex to apply to results
 * [ ] Default disable bare (sub)domains without a path, allow option to enable.

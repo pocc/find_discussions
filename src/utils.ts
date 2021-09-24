@@ -5,16 +5,16 @@ export function generateLine(fp: forumPost): string {
     const site_ico_path = chrome.runtime.getURL(`media/${fp.source}.ico`)
     const site_ico = `<img src="${site_ico_path}" alt="${fp.source}" width="16px" height="16px" />`
     const score = intToString(fp.score)
-    const scoreStr = `<span title="This ${fp.type} has ${score} points"><b>${score}</b>👍</span>`
+    const scoreStr = `<span title="This ${fp.type} has ${score} points"><b>${score}</b></span>`
     const commentCount = intToString(fp.comment_count)
     let answer_svg = "";
     if (fp.source === "stackexchange") {
         answer_svg = `<svg alt="The question owner accepted this as the best answer" width="16" height="16" viewBox="0 0 36 36"><path d="m6 14 8 8L30 6v8L14 30l-8-8v-8z" fill="#65B37F"></path></svg>`;
     }
-    const commentStr = `<span title="This ${fp.type} has ${commentCount} comments"><b>${commentCount}</b>💬</span>`
+    const commentStr = `<span title="This ${fp.type} has ${commentCount} comments"><b>${commentCount}</b></span>`
     const type_svg_path = chrome.runtime.getURL(`media/${fp.type}.svg`)
     const type_svg = `<img src="${type_svg_path}" alt="${fp.type}" width="16px" height="16px" />`
-    return `<p>${site_ico} ${type_svg}${answer_svg} ${fp.created_date} ${scoreStr} ${commentStr} <a href="${fp.url}">${fp.title}</a></p>`
+    return `<tr><td>${site_ico} ${type_svg}${answer_svg}</td><td>${fp.created_date}</td><td>${scoreStr}</td><td>${commentStr}</td><td class="link"><a href="${fp.url}">${fp.title}</a></td></tr>`
 }
 
 // copied from https://stackoverflow.com/questions/10599933/, assume no post/comment will have >= 1T points
