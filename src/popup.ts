@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     chrome.tabs.query(queryOptions, async (tabs) => {
         const tab = tabs[0];
         const fullUrl = tab.url || tab.pendingUrl;  // If url isn't available, page is still loading
-        if (fullUrl) {
+        if (fullUrl && fullUrl.startsWith("http")) {
             // remove search and heash from url
             const urlObj = new URL(fullUrl)
             const url = urlObj.protocol+'//'+urlObj.host+urlObj.pathname
@@ -30,34 +30,50 @@ async function runExtn(url: string) {
     const utilsJsUrl = chrome.runtime.getURL("build/utils.js");
     const utils = await import(utilsJsUrl);
 
-    const limit = 3 // sane default limit for requests
     let all_results: any = [];
     console.log("Reading info for url:" + url)
     try {
-        const hn_results = await hn.searchHN(url, ["story"], limit);
+        const HN_ALGOLIA_DEFAULT_LIMIT = 30
+        const hn_results = await hn.searchHN(url, ["story"], HN_ALGOLIA_DEFAULT_LIMIT);
         all_results = all_results.concat(hn_results)
     } catch(err) { console.log("Unable to fetch hacker news results." + err) }
     try {
-        const reddit_results = await reddit.search_reddit(url, ["post"], limit, "top");
+        const reddit_results = await reddit.search_reddit(url, ["post"], "top");
         all_results = all_results.concat(reddit_results)
     } catch(err) { console.log("Unable to fetch reddit results." + err) }
     try {
-        const se_results = await stackExchange.search_stack_exchange(url, ["question", "answer"], limit, "activity", ["stackoverflow"]);
+        const se_results = await stackExchange.search_stack_exchange(url, ["question", "answer"], "activity", ["stackoverflow"]);
         all_results = all_results.concat(se_results)
     } catch(err) { console.log("Unable to fetch stack exchange results." + err) }
     console.log(all_results)
-
-    // Choose top 3 results by comments, descending order
-    all_results = all_results.sort((a: any, b: any) => {return b.comment_count - a.comment_count});
-    const top3_results = all_results.slice(0, 3);
-    await chrome.browserAction.setBadgeText({text: top3_results.length.toString()});
+    if (all_results.length > 0) {
+        // filter out 0 comment discussions
+        all_results = all_results.filter((r: any) => r.comment_count > 0);
+        // sort descending
+        all_results = all_results.sort((a: any, b: any) => {return b.comment_count - a.comment_count});
+    }
+    await chrome.browserAction.setBadgeText({text: all_results.length.toString()});
     await chrome.browserAction.setBadgeBackgroundColor({color: "#666666"});
     let newHTML = ""
-    for (const r of top3_results) {
+    for (const r of all_results) {
         newHTML += utils.generateLine(r);
     }
-    const thead = `<thead><th>Site</th><th>Date</th><th>👍</th><th>💬</th><th>Link</th></thead>`
-    newHTML = `<table>${thead}<tbody>${newHTML}</tbody></table>`
+    if (all_results.length > 0) {
+        if (all_results[0].comment_count >= 50) {
+            const logo = chrome.runtime.getURL("media/logo_128.png");
+            chrome.notifications.create({
+                type: 'basic',
+                iconUrl: logo,
+                title: 'Large discussion',
+                message: 'A post about this url has >= 50 comments',
+                priority: 2
+            })
+        }
+        const thead = `<thead><th>Site</th><th>Date</th><th>👍</th><th>💬</th><th>Link</th></thead>`
+        newHTML = `<table>${thead}<tbody>${newHTML}</tbody></table>`
+    } else {
+        newHTML = "No discussions found."
+    }
 
     const div = document.createElement("div");
     div.innerHTML = newHTML

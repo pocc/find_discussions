@@ -18,8 +18,8 @@ This chrome/firefox extension will find related discussions of your current url 
 * [X] Move API requests from content script to background script (60m)
   * > moved it to popup script, which does the same thing from CORS perspective
 * [X] Filter out stack overflow questions and answers that have the same question_id (prefer answer) (15m)
-  * [ ] Convert HTML from `<p>` to table so it's aligned (30m)
-* [ ] Send a chrome notification on links with > 10 comments on Reddit or Hacker News or > 5 votes on Stack Overflow
+* [X] Convert HTML from `<p>` to table so it's aligned (30m)
+* [X] Send a chrome notification on links with > 50 comments on Reddit or Hacker News
 * [ ] Update badge on page load
 * [ ] Cache results in localstorage with key of date.
 * [ ] Limit number of elements through UI rather than pre-limit it in requests

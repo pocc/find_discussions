@@ -37,7 +37,7 @@ import {forumPost, redditPost} from 'index';
 import {fetchGetOptions} from './utils.js';
 
 
-export async function search_reddit(url: String, type: String, limit: number, sort: String): Promise<forumPost[]> {
+export async function search_reddit(url: String, type: String, sort: String): Promise<forumPost[]> {
     // It would be nice to limit in search query how many to return
     const resp = await fetch(`https://www.reddit.com/search/?q=url%3A${url}&type=${type}&sort=${sort}`, fetchGetOptions as any);
     const pagetext = await resp.text()
@@ -45,11 +45,7 @@ export async function search_reddit(url: String, type: String, limit: number, so
     let posts: forumPost[] = []
     if (match !== null) {
         const data = JSON.parse(match[1])
-        let counter = 0;
         for (const page of Object.keys(data['posts']['models'])) {
-            if (limit == counter) {
-                break
-            }
             const redditPostData: redditPost = data.posts.models[page]
             const created_date = new Date(redditPostData.created).toISOString().substring(0,10)
             posts.push({
@@ -62,7 +58,6 @@ export async function search_reddit(url: String, type: String, limit: number, so
                 comment_count: redditPostData.numComments,
                 is_accepted_answer: false,  // Only for Stack Exchange answers
             })
-            counter += 1;
         }
     } 
     return posts

@@ -30,18 +30,15 @@ import {fetchGetOptions} from './utils.js'
 import { SEResp, forumPost, SEAnswer, SEQuestion } from 'index.js';
 
 
-export async function search_stack_exchange(url: string, types: string[], limit: number, sort: string, subsites: string[]): Promise<forumPost[]> {
+export async function search_stack_exchange(url: string, types: string[], sort: string, subsites: string[]): Promise<forumPost[]> {
     const urlBase = "https://api.stackexchange.com/2.3/search/excerpts?order=desc"
-    let counter = 0;
     let posts: forumPost[] = []
     let noDupes: number[] = []
     for (const subsite of subsites) {
-        if (counter == limit || limit < 1) break;
         const fetchURL = `${urlBase}&sort=${sort}&url=${encodeURIComponent(url)}&site=${subsite}`
         const resp = await fetch(fetchURL, fetchGetOptions as any);
         const stackExchangeResp = await resp.json() as SEResp;
         for (const item of stackExchangeResp.items) {
-            if (counter == limit) break;
             if (types.includes(item.item_type) && !noDupes.includes(item.question_id)) {
                 noDupes.push(item.question_id)
                 const created_date = new Date(item.creation_date*1000).toISOString().substring(0,10)
@@ -63,7 +60,6 @@ export async function search_stack_exchange(url: string, types: string[], limit:
                     comment_count: comment_count,
                     is_accepted_answer: item.is_accepted
                 })
-                counter += 1
             }
         }
     }
