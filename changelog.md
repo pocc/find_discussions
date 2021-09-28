@@ -17,7 +17,7 @@ This will be accurate on every commit.
 * [X] Update badge on page load instead of clicking on extension
 * [X] Cache results in localstorage with key of date.
 * [X] Limit number of elements through UI rather than pre-limit it in requests
-* [ ] Currently https://stackoverflow.com/questions?tab=Votes matches all questions. Fix this.
+* [X] Currently `https://stackoverflow.com/questions?tab=Votes` matches all questions. Fix this.
 * [ ] Use react for components (120m)
   * [ ] Have textbox for number of elements to show 0 for ∞ (30m)
   * [ ] Plus sign at bottom to show 1 more result (30m)

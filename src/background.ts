@@ -56,13 +56,14 @@ import {forumPost} from 'index'
             ...
         ]
     }
-
 }
 */
 
 type globalCache = {[isodate: string]: {[url: string]: forumPost[]}}
 let EXTN_CACHE: globalCache = Object()
+let URLS_NOTIFIED: string[] = [] // Don't notify twice for the same URL
 const getISODate = () => new Date().toISOString().substr(0,10)
+const isDomain = (url: string) => new URL(url).pathname === '/'
 let INIT_ISODATE = getISODate()
 chrome.browserAction.setBadgeBackgroundColor({color: "#666666"}, ()=>{});    
 
@@ -124,15 +125,24 @@ async function setURLData(url: string) {
         chrome.browserAction.setBadgeText({text: results.length.toString()}, ()=>{});
     }
     console.log(`${chrome.runtime.getURL('')} storage :`, EXTN_CACHE)
-    if (EXTN_CACHE[isoToday][url].length > 0 && EXTN_CACHE[isoToday][url][0].comment_count >= 50) {
-        const logo = chrome.runtime.getURL("media/logo_128.png");
-        chrome.notifications.create({
-            type: 'basic',
-            iconUrl: logo,
-            title: 'Large discussion',
-            message: 'A post about this url has >= 50 comments',
-            priority: 2
-        })
+    const hasDiscussions = EXTN_CACHE[isoToday][url].length > 0
+    if (hasDiscussions) {
+        const hasLargeDiscussion = EXTN_CACHE[isoToday][url][0].comment_count >= 50
+        const discussionAboutDomain = isDomain(url)  // More likely to hit a common website and annoy people
+        const hasPath = (new URL(url).pathname.match(/\//g) || []).length > 1 // Avoid github.com/search and google.com/search
+        const is1stNotification = URLS_NOTIFIED.includes(url)
+        console.log(url, hasLargeDiscussion, discussionAboutDomain, hasPath, is1stNotification)
+        if (hasLargeDiscussion && !discussionAboutDomain && hasPath && !is1stNotification) {
+            URLS_NOTIFIED.push(url);
+            const logo = chrome.runtime.getURL("media/logo_128.png");
+            chrome.notifications.create({
+                type: 'basic',
+                iconUrl: logo,
+                title: 'Large discussion',
+                message: 'A post about this url has >= 50 comments',
+                priority: 2
+            })
+        }
     }
 }
 

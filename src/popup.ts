@@ -11,9 +11,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         const tab = tabs[0];
         const fullUrl = tab.url || tab.pendingUrl;  // If url isn't available, page is still loading
         if (fullUrl && fullUrl.startsWith("http")) {
-            // remove search and heash from url
+            // remove hash from url
             const urlObj = new URL(fullUrl)
-            const url = urlObj.protocol+'//'+urlObj.host+urlObj.pathname
+            const url = urlObj.protocol+'//'+urlObj.host+urlObj.pathname+urlObj.search
             chrome.runtime.sendMessage({url: url}, async (resp: {data: forumPost[]}) => {
                 await runExtn(url, resp.data)
             });
