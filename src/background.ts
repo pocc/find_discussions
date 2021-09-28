@@ -15,7 +15,7 @@
  * 
  * Message type in index.d.ts
 
-## Example data for future
+## Example data for future (filter by type: main_frame)
 webRequest that is tertiary to the main page:
 {
     "frameId": 412,
@@ -29,7 +29,7 @@ webRequest that is tertiary to the main page:
     "url": "https://signaler-pa.clients6.google.com/punctual/multi-watch/channel?gsessionid=-9MVJVP1vl7p_agW-Pw-1WWxImFbB-Vhn30xNkqwRBc&key=AIzaSyB1j3mFq6w9iUpl8m8UNezy4TBwy9Eb8b4&VER=8&RID=rpc&SID=2l2pcm2tPLA9VdiijLWwbw&CI=0&AID=56&TYPE=xmlhttp&zx=uba3lcup1ue5&t=1"
 }
 
-webRequest that is loading the main page:
+webRequest that is loading the page url in the active tab:
 {
     "frameId": 0,
     "initiator": "https://stackoverflow.com",
@@ -59,8 +59,10 @@ import {forumPost} from 'index'
 
 }
 */
+
 type globalCache = {[isodate: string]: {[url: string]: forumPost[]}}
 let EXTN_CACHE: globalCache = Object()
+const getISODate = () => new Date().toISOString().substr(0,10)
 let INIT_ISODATE = getISODate()
 chrome.browserAction.setBadgeBackgroundColor({color: "#666666"}, ()=>{});    
 
@@ -71,41 +73,24 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 });
 
-function getISODate(): string {
-    return new Date().toISOString().substr(0,10)
-}
+chrome.runtime.onMessage.addListener(
+    (request, _, sendResponse) => {
+        setURLData(request.url).then(() => {
+            const isoToday = getISODate();
+            console.log("Popup is calling background script and sees this extension storage", EXTN_CACHE);
+            sendResponse({data: EXTN_CACHE[isoToday][request.url]});
+        });
+        return true;
+    }
+);
 
 chrome.webRequest.onBeforeRequest.addListener(
     (webRequest) => {
         // No feedback loops (don't react to requests made by this extension)
         const inspectingOwnTraffic = chrome.runtime.getURL('') === (webRequest.initiator || "") + "/"
-        const isoToday = getISODate();
-        const url = webRequest.url
-        const isCached = Object.keys(EXTN_CACHE).length > 0 && Object.keys(EXTN_CACHE[isoToday]).includes(url)
         if (!inspectingOwnTraffic) {
-            if (isCached) {
-                console.log(`Using cache for "${url}".`)
-                const results = EXTN_CACHE[isoToday][url]
-                chrome.browserAction.setBadgeText({text: results.length.toString()}, ()=>{});
-            } else {
-                console.log(`${chrome.runtime.getURL('')}: Intercepted web request from "${webRequest.initiator}" for "${url}"`, webRequest)
-                // ISO date is YYYY-MM-DD
-                queryForumAPIs(url).then((results) => {
-                    let dayCache = Object();
-                    if (Object.keys(EXTN_CACHE).includes(isoToday)) {
-                        dayCache = EXTN_CACHE[isoToday]
-                    }
-                    dayCache[url] = results
-                    EXTN_CACHE[isoToday] = dayCache;
-                    if (isoToday !== INIT_ISODATE) { // filter out non today cache
-                        Object.keys(EXTN_CACHE)
-                            .filter(key => isoToday !== key)
-                            .forEach(key => delete EXTN_CACHE[key]);                  
-                    }
-                    chrome.browserAction.setBadgeText({text: results.length.toString()}, ()=>{});
-                });
-            }
-            console.log(`${chrome.runtime.getURL('')} storage :`, EXTN_CACHE)
+            console.log(`${chrome.runtime.getURL('')}: Intercepted web request from "${webRequest.initiator}" for "${webRequest.url}"`, webRequest);
+            setURLData(webRequest.url) // async
         }
     },
     {
@@ -113,6 +98,43 @@ chrome.webRequest.onBeforeRequest.addListener(
         types: ['main_frame']
     }
 );
+
+// For a given URL, get data, set it to global cache, and return url data
+async function setURLData(url: string) {
+    const isoToday = getISODate();
+    const isCached = Object.keys(EXTN_CACHE).length > 0 && Object.keys(EXTN_CACHE[isoToday]).includes(url)
+    if (isCached) {
+        console.log(`Using cache for "${url}".`)
+        const results = EXTN_CACHE[isoToday][url]
+        chrome.browserAction.setBadgeText({text: results.length.toString()}, ()=>{});
+    } else {
+        // ISO date is YYYY-MM-DD
+        const results = await queryForumAPIs(url);
+        let dayCache = Object();
+        if (Object.keys(EXTN_CACHE).includes(isoToday)) {
+            dayCache = EXTN_CACHE[isoToday]
+        }
+        dayCache[url] = results
+        EXTN_CACHE[isoToday] = dayCache;
+        if (isoToday !== INIT_ISODATE) { // filter out non today cache
+            Object.keys(EXTN_CACHE)
+                .filter(key => isoToday !== key)
+                .forEach(key => delete EXTN_CACHE[key]);                  
+        }
+        chrome.browserAction.setBadgeText({text: results.length.toString()}, ()=>{});
+    }
+    console.log(`${chrome.runtime.getURL('')} storage :`, EXTN_CACHE)
+    if (EXTN_CACHE[isoToday][url].length > 0 && EXTN_CACHE[isoToday][url][0].comment_count >= 50) {
+        const logo = chrome.runtime.getURL("media/logo_128.png");
+        chrome.notifications.create({
+            type: 'basic',
+            iconUrl: logo,
+            title: 'Large discussion',
+            message: 'A post about this url has >= 50 comments',
+            priority: 2
+        })
+    }
+}
 
 async function queryForumAPIs(url: string): Promise<forumPost[]> {
     const hnJsUrl = chrome.runtime.getURL("build/hn.js");

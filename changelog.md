@@ -14,9 +14,10 @@ This will be accurate on every commit.
 * [X] Filter out stack overflow questions and answers that have the same question_id (prefer answer) (15m)
 * [X] Convert HTML from `<p>` to table so it's aligned (30m)
 * [X] Send a chrome notification on links with > 50 comments on Reddit or Hacker News
-* [ ] Update badge on page load instead of clicking on extension
-* [ ] Cache results in localstorage with key of date.
-* [ ] Limit number of elements through UI rather than pre-limit it in requests
+* [X] Update badge on page load instead of clicking on extension
+* [X] Cache results in localstorage with key of date.
+* [X] Limit number of elements through UI rather than pre-limit it in requests
+* [ ] Currently https://stackoverflow.com/questions?tab=Votes matches all questions. Fix this.
 * [ ] Use react for components (120m)
   * [ ] Have textbox for number of elements to show 0 for ∞ (30m)
   * [ ] Plus sign at bottom to show 1 more result (30m)
@@ -24,7 +25,7 @@ This will be accurate on every commit.
 * [ ] Add option for URL regex to apply to results
 * [ ] Default disable bare (sub)domains without a path, allow option to enable.
         Most domains like stackoverflow.com aren't as interesting as paths on the website.
-* [ ] Add 24h caching for a URL and save to local storage (30m)
+* [X] Add 24h caching for a URL and save to local storage (30m)
 
 ### Nice to have
 
