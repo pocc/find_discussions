@@ -2,8 +2,12 @@
     "content_scripts": [{
         "matches": ["*://*/*"],
         "js": ["build/content_script.js"],
-        "run_at": "document_end"
+        "run_at": "document_start"
     }],
+    "background": {
+        "scripts": ["/build/background.js"],
+        "persistent": true
+    },
     "icons": {
         "16": "media/logo_16.png",
         "48": "media/logo_48.png",
@@ -29,7 +33,7 @@
         "media/answer.svg"    
     ],
     "manifest_version": 2,
-    "permissions": ["tabs", "notifications"],
+    "permissions": ["tabs", "notifications", "storage", "webRequest", "*://*/*"],
     "author": "Ross Jacobs",
     "name": "Find Discussions",
     "description": "Browser extension to find discussions of your current page",

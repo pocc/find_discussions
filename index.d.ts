@@ -15,6 +15,23 @@ export type Settings = {
     limit: number
 }
 
+export type CrxExtnScript = "popup" | "content_script" | "background"
+
+export interface CrxExtnMsg {
+    source: CrxExtnScript
+    dest: CrxExtnScript
+}
+
+export interface CrxExtnQuery extends CrxExtnMsg {
+    url: string
+}
+
+export interface CrxExtnResp extends CrxExtnMsg {
+    results: forumPost[];
+    error?: string;
+    errorCode?: number
+}
+
 // node-fetch response
 export type NFResponse = import("./node_modules/node-fetch/@types/index").Response
 

@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
             const url = urlObj.protocol+'//'+urlObj.host+urlObj.pathname
             await runExtn(url)
         } else {
-            console.error(`Tab url for tab ID ${tab.id} not found`)
+            console.log(`FIND_DISCUSSIONS_EXTN: Tab url for tab ID ${tab.id} not found`)
         }
     });
 });
@@ -54,7 +54,7 @@ async function runExtn(url: string) {
     }
     await chrome.browserAction.setBadgeText({text: all_results.length.toString()});
     await chrome.browserAction.setBadgeBackgroundColor({color: "#666666"});
-    let newHTML = ""
+    let newHTML = `Search <input type="text" id="filter" name="filter" size="72"><br>`
     for (const r of all_results) {
         newHTML += utils.generateLine(r);
     }
@@ -72,12 +72,13 @@ async function runExtn(url: string) {
         const thead = `<thead><th>Site</th><th>Date</th><th>👍</th><th>💬</th><th>Link</th></thead>`
         newHTML = `<table>${thead}<tbody>${newHTML}</tbody></table>`
     } else {
-        newHTML = "No discussions found."
+        newHTML += "No discussions found."
     }
 
     const div = document.createElement("div");
     div.innerHTML = newHTML
     document.body.appendChild(div);
+    (document.getElementById("filter") as any).value = url;
     // You can't open a link from a popup, so ask chrome to open new tabs
     const links = document.getElementsByTagName("a");
     for (let i=0; i < links.length; i++) {

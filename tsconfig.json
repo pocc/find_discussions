@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
       // project options
-      "module": "ES2020",
+      "module": "ES2020", // chrome requires this 
       "lib": [
         "ESNext",
         "dom",
