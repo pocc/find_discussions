@@ -57,17 +57,21 @@ export async function search_reddit(url: String, type: String, sort: String): Pr
         }
         for (const page of Object.keys(data['posts']['models'])) {
             const redditPostData: redditPost = data.posts.models[page]
-            const created_date = new Date(redditPostData.created).toISOString().substring(0,10)
-            posts.push({
-                type: "post",
-                source: "reddit",
-                created_date: created_date,
-                title: redditPostData.title,
-                url: redditPostData.permalink,
-                score: redditPostData.score,
-                comment_count: redditPostData.numComments,
-                is_accepted_answer: false,  // Only for Stack Exchange answers
-            })
+            // Source URL of post should match the url we are searching for
+            // Searching for "chrome://extensions" can get a search for "chrome extensions"
+            if (redditPostData.source.url === url) {
+                const created_date = new Date(redditPostData.created).toISOString().substring(0,10)
+                posts.push({
+                    type: "post",
+                    source: "reddit",
+                    created_date: created_date,
+                    title: redditPostData.title,
+                    url: redditPostData.permalink,
+                    score: redditPostData.score,
+                    comment_count: redditPostData.numComments,
+                    is_accepted_answer: false,  // Only for Stack Exchange answers
+                })
+            }
         }
     } 
     return posts

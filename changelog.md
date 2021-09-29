@@ -26,10 +26,25 @@ This will be accurate on every commit.
 * [ ] Default disable bare (sub)domains without a path, allow option to enable.
         Most domains like stackoverflow.com aren't as interesting as paths on the website.
 * [X] Add 24h caching for a URL and save to local storage (30m)
+* [ ] Have button to lock results for website so that when you move to a different URL, the results stay in the popup
+* [ ] Change URL for context menus and popup when switching tabs
 
 ### Nice to have
 
-* [ ] Add support for twitter (240m)
 * [ ] Add support for wikipedia (240m)
-* [ ] Add support for general google links (240m)
+* [ ] WordPress (www.wordpress.org)
+* [ ] Medium (www.medium.com)
+* [ ] Substack
+* [ ] LinkedIn (www.linkedin.com)
 * [ ] Add support for github READMEs/issues/pull requests (240m)
+* [ ] Add support for twitter (240m)
+* [ ] Add support for tumblr
+* [ ] Add support for facebook
+* [ ] Add support for Instagram
+
+### Marginal
+
+* [ ] Wix (www.wix.com)
+* [ ] Weebly (www.weebly.com)
+* [ ] Ghost (www.ghost.org)
+* [ ] Blogger (www.blogger.com)

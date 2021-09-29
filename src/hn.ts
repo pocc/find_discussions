@@ -74,16 +74,20 @@ export async function searchHN(url: string, typesAry: string[], limit: number): 
     // Right now, we're only showing stories
     let stories = body.hits as HNStory[];
     for (const hit of stories) {
-        HNPosts.push({
-            type: "post",
-            source: "hackernews",
-            created_date: hit.created_at.substr(0,10),
-            url: "https://news.ycombinator.com/item?id=" + hit["objectID"],
-            title: hit.title,
-            comment_count: hit.num_comments,
-            score: hit.points,
-            is_accepted_answer: false  // Accepted answer is for stack overflow
-        });
+        // Source URL of post should match the url we are searching for
+        // Searching for "chrome://extensions" can get a search for "chrome extensions"
+        if (hit.url === url) {
+            HNPosts.push({
+                type: "post",
+                source: "hackernews",
+                created_date: hit.created_at.substr(0,10),
+                url: "https://news.ycombinator.com/item?id=" + hit["objectID"],
+                title: hit.title,
+                comment_count: hit.num_comments,
+                score: hit.points,
+                is_accepted_answer: false  // Accepted answer is for stack overflow
+            });
+        }
     }
     return HNPosts
 }

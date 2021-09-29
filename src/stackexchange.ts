@@ -50,7 +50,10 @@ export async function search_stack_exchange(url: string, types: string[], sort: 
             return [];
         }
         for (const item of stackExchangeResp.items) {
-            if (types.includes(item.item_type) && !noDupes.includes(item.question_id)) {
+            const isCorrectType = types.includes(item.item_type)
+            const hasNoDupes = !noDupes.includes(item.question_id)
+            const urlIsCorrect = true // Change this if URL gets parsed as a query
+            if (isCorrectType && hasNoDupes && urlIsCorrect) {
                 noDupes.push(item.question_id)
                 const created_date = new Date(item.creation_date*1000).toISOString().substring(0,10)
                 let url = ""

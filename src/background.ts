@@ -61,14 +61,13 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-/*chrome.contextMenus.onClicked.addListener((info, tab: chrome.tabs.Tab) => {
-    console.log("Context menu", info, "tabs", tab)
-    const urlObj = new URL((tab as any).url);
-    const url = urlObj.protocol+'//'+urlObj.host+urlObj.pathname+urlObj.search
-    createMenu(url)
-})*/
+/* This creates a context menu when you right click on the page 
+It will create a list of items where title is post title and
+clicking on tthe item will open a new tab with that url.
 
-
+On page load, it removes the previous context menu and 
+replaces it with the correct one.
+*/
 function reCreateMenu(postList: forumPost[]) {
     chrome.contextMenus.removeAll(() => {
         let counter = 0;
@@ -85,6 +84,8 @@ function reCreateMenu(postList: forumPost[]) {
     });
 }
 
+/* Intercept requests for URLs being accessed in the address bar
+so that this extension can query URLs as fast possible */
 chrome.webRequest.onBeforeRequest.addListener(
     (webRequest) => {
         // No feedback loops (don't react to requests made by this extension)
