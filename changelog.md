@@ -23,7 +23,7 @@ This will be accurate on every commit.
   * [ ] Plus sign at bottom to show 1 more result (30m)
   * [ ] Create an checkbox on the popup which will ensure that it won't show on this domain (60m)
 * [ ] Add option for URL regex to apply to results
-* [ ] Default disable bare (sub)domains without a path, allow option to enable.
+* [X] Default disable bare (sub)domains without a path, allow option to enable.
         Most domains like stackoverflow.com aren't as interesting as paths on the website.
 * [X] Add 24h caching for a URL and save to local storage (30m)
 * [ ] Have button to lock results for website so that when you move to a different URL, the results stay in the popup

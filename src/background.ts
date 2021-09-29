@@ -183,6 +183,7 @@ async function setURLData(url: string) {
         console.log(`Using cache for "${url}".`)
         results = EXTN_CACHE[isoToday][url]
     } else {
+        chrome.browserAction.setBadgeText({text: "?"}); // Get rid of stale badge num ASAP
         results = await queryForumAPIs(url);
         setExtnCache(isoToday, url, results)
     }
