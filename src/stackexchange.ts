@@ -36,6 +36,7 @@ export async function search_stack_exchange(url: string, types: string[], sort: 
     let noDupes: number[] = []
     for (const subsite of subsites) {
         const fetchURL = `${urlBase}&sort=${sort}&url=${encodeURIComponent(url)}&site=${subsite}`
+        console.log("Fetching", fetchURL)
         const resp = await fetch(fetchURL, fetchGetOptions as any);
         const resptext = await resp.text();
         let stackExchangeResp: SEResp = Object();
@@ -67,6 +68,7 @@ export async function search_stack_exchange(url: string, types: string[], sort: 
                 posts.push({
                     type: item.item_type,
                     source: "stackexchange",
+                    sub_source: subsite,
                     created_date: created_date,
                     title: item.title,
                     url: url,

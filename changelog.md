@@ -28,8 +28,17 @@ This will be accurate on every commit.
 * [X] Add 24h caching for a URL and save to local storage (30m)
 * [ ] Have button to lock results for website so that when you move to a different URL, the results stay in the popup
 * [ ] Change URL for context menus and popup when switching tabs
+* [ ] Send a new search if input box changes
+* [ ] Increase stackoverflow requests from 300 to 10000 by using oauth
+
+### Edge cases (plz help!)
+
+* Searching for `chrome://extensions` yields no results, but this stack overflow question has it
+  `https://stackoverflow.com/questions/34888431/link-to-chrome-extensions-page-in-non-extension-html`
 
 ### Nice to have
+
+* [ ] Allow for search in comments
 
 * [ ] Add support for wikipedia (240m)
 * [ ] WordPress (www.wordpress.org)

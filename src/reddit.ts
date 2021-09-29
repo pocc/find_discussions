@@ -39,7 +39,9 @@ import {fetchGetOptions} from './utils.js';
 
 export async function search_reddit(url: String, type: String, sort: String): Promise<forumPost[]> {
     // It would be nice to limit in search query how many to return
-    const resp = await fetch(`https://www.reddit.com/search/?q=url%3A${url}&type=${type}&sort=${sort}`, fetchGetOptions as any);
+    const fetchURL = `https://www.reddit.com/search/?q=url%3A${url}&type=${type}&sort=${sort}`;
+    console.log("Fetching", fetchURL)
+    const resp = await fetch(fetchURL, fetchGetOptions as any);
     const pagetext = await resp.text()
     const match = /window\.___r = (.*);<\/script>/g.exec(pagetext)
     let posts: forumPost[] = []
@@ -59,11 +61,17 @@ export async function search_reddit(url: String, type: String, sort: String): Pr
             const redditPostData: redditPost = data.posts.models[page]
             // Source URL of post should match the url we are searching for
             // Searching for "chrome://extensions" can get a search for "chrome extensions"
-            if (redditPostData.source.url === url) {
+            if (redditPostData.source && redditPostData.source.url === url) {
                 const created_date = new Date(redditPostData.created).toISOString().substring(0,10)
+                let sub_reddit = ""
+                const sub_reddit_matches = /reddit\.com\/(r\/.*?)\//g.exec(redditPostData.permalink)
+                if (sub_reddit_matches) {
+                    sub_reddit = sub_reddit_matches[1]
+                }
                 posts.push({
                     type: "post",
                     source: "reddit",
+                    sub_source: sub_reddit,
                     created_date: created_date,
                     title: redditPostData.title,
                     url: redditPostData.permalink,

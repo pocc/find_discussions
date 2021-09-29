@@ -7,6 +7,8 @@ This chrome/firefox extension will find related discussions of your current url 
 * news.ycombinator.com
 * stackoverflow questions and answers
 
+Maybe create a subreddit for interesting finds?
+
 ## Settings
 
 * Search reddit/hn comments as well

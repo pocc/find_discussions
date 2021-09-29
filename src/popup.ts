@@ -6,23 +6,16 @@ import {forumPost} from 'index'
 
 document.addEventListener("DOMContentLoaded", async (event) => {
     console.log("FIND_DISCUSSIONS_EXTN: started with event", event)
-    const queryOptions = { active: true, currentWindow: true };
-    chrome.tabs.query(queryOptions, async (tabs) => {
-        const tab = tabs[0];
-        const fullUrl = tab.url || tab.pendingUrl;  // If url isn't available, page is still loading
-        if (fullUrl && fullUrl.startsWith("http")) {
-            // remove hash from url
-            const urlObj = new URL(fullUrl)
-            const url = urlObj.protocol+'//'+urlObj.host+urlObj.pathname+urlObj.search
-            chrome.runtime.sendMessage({url: url}, async (resp: {data: forumPost[]}) => {
-                await runExtn(url, resp.data)
-            });
+    chrome.runtime.sendMessage({event: "popup clicked"}, async (resp: {url: string, forumposts: forumPost[]}) => {
+        await runExtn(resp.url, resp.forumposts)
+        /*if (resp.url.startsWith('http')) {
+
         } else {
-            console.log(`FIND_DISCUSSIONS_EXTN: Tab url for tab ID ${tab.id} not found`)
+            console.log(`FIND_DISCUSSIONS_EXTN: URL ${resp.url} did not have a valid tab`)
             const div = document.createElement("div");
-            div.innerHTML = `<pre>${fullUrl}</pre><p>is not a valid webpage (http:// or https://). Try browsing around to get results.</p>`
+            div.innerHTML = `<pre>${resp.url}</pre><p>is not a valid webpage (http:// or https://). Try browsing around to get results.</p>`
             document.body.appendChild(div);
-        }
+        }*/
     });
 });
     

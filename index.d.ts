@@ -2,8 +2,9 @@
 export type forumPost = {
     created_date: string;
     source: "hackernews" | "reddit" | "stackexchange"
+    sub_source: string, // subreddit or stackexchange site
     title: string;
-    type: "post" | "comment" | "story" | "question" | "answer";
+    type: "post" | "comment" | "story" | "question" | "answer" | "extn loading";
     url: string;
     score: number;
     comment_count: number;

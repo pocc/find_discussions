@@ -80,6 +80,7 @@ export async function searchHN(url: string, typesAry: string[], limit: number): 
             HNPosts.push({
                 type: "post",
                 source: "hackernews",
+                sub_source: "hackernews",
                 created_date: hit.created_at.substr(0,10),
                 url: "https://news.ycombinator.com/item?id=" + hit["objectID"],
                 title: hit.title,
