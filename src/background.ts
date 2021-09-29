@@ -14,35 +14,6 @@
  * This requires a persistent background script to receive this data.
  * 
  * Message type in index.d.ts
-
-## Example data for future (filter by type: main_frame)
-webRequest that is tertiary to the main page:
-{
-    "frameId": 412,
-    "initiator": "https://hangouts.google.com",
-    "method": "GET",
-    "parentFrameId": 0,
-    "requestId": "273659",
-    "tabId": 284,
-    "timeStamp": 1632856394217.238,
-    "type": "xmlhttprequest",
-    "url": "https://signaler-pa.clients6.google.com/punctual/multi-watch/channel?gsessionid=-9MVJVP1vl7p_agW-Pw-1WWxImFbB-Vhn30xNkqwRBc&key=AIzaSyB1j3mFq6w9iUpl8m8UNezy4TBwy9Eb8b4&VER=8&RID=rpc&SID=2l2pcm2tPLA9VdiijLWwbw&CI=0&AID=56&TYPE=xmlhttp&zx=uba3lcup1ue5&t=1"
-}
-
-webRequest that is loading the page url in the active tab:
-{
-    "frameId": 0,
-    "initiator": "https://stackoverflow.com",
-    "method": "GET",
-    "parentFrameId": -1,
-    "requestId": "275240",
-    "tabId": 341,
-    "timeStamp": 1632856681865.253,
-    "type": "main_frame",
-    "url": "https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array"
-}
-
-
  */
 
 import {forumPost} from 'index'
@@ -62,6 +33,8 @@ import {forumPost} from 'index'
 type globalCache = {[isodate: string]: {[url: string]: forumPost[]}}
 let EXTN_CACHE: globalCache = Object()
 let URLS_NOTIFIED: string[] = [] // Don't notify twice for the same URL
+let CURR_NOTIFICATION_ID = '';
+let CURR_LARGEST_DISCUSSION = '';
 const getISODate = () => new Date().toISOString().substr(0,10)
 const isDomain = (url: string) => new URL(url).pathname === '/'
 let INIT_ISODATE = getISODate()
@@ -100,6 +73,17 @@ chrome.webRequest.onBeforeRequest.addListener(
     }
 );
 
+/* Respond to the user's clicking one of the buttons on a notification.*/
+chrome.notifications.onButtonClicked.addListener((notifId, btnIdx) => {
+    if (notifId === CURR_NOTIFICATION_ID) {
+        if (btnIdx === 0) {
+            chrome.tabs.create({active: true, url: CURR_LARGEST_DISCUSSION})
+        } else if (btnIdx === 1) {
+            alert("settings not implemented");
+        }
+    }
+});
+
 // For a given URL, get data, set it to global cache, and return url data
 async function setURLData(url: string) {
     const isoToday = getISODate();
@@ -127,11 +111,12 @@ async function setURLData(url: string) {
     console.log(`${chrome.runtime.getURL('')} storage :`, EXTN_CACHE)
     const hasDiscussions = EXTN_CACHE[isoToday][url].length > 0
     if (hasDiscussions) {
-        const hasLargeDiscussion = EXTN_CACHE[isoToday][url][0].comment_count >= 50
+        const firstResult: forumPost = EXTN_CACHE[isoToday][url][0];
+        CURR_LARGEST_DISCUSSION = firstResult.url;
+        const hasLargeDiscussion = firstResult.comment_count >= 20
         const discussionAboutDomain = isDomain(url)  // More likely to hit a common website and annoy people
         const hasPath = (new URL(url).pathname.match(/\//g) || []).length > 1 // Avoid github.com/search and google.com/search
         const is1stNotification = URLS_NOTIFIED.includes(url)
-        console.log(url, hasLargeDiscussion, discussionAboutDomain, hasPath, is1stNotification)
         if (hasLargeDiscussion && !discussionAboutDomain && hasPath && !is1stNotification) {
             URLS_NOTIFIED.push(url);
             const logo = chrome.runtime.getURL("media/logo_128.png");
@@ -139,9 +124,11 @@ async function setURLData(url: string) {
                 type: 'basic',
                 iconUrl: logo,
                 title: 'Large discussion',
-                message: 'A post about this url has >= 50 comments',
-                priority: 2
-            })
+                message: 'A post about this url has >= 20 comments',
+                priority: 2,
+                silent: true,
+                buttons: [{title: `Go to ${firstResult.source} discussion`}]
+            }, (id) => CURR_NOTIFICATION_ID = id)
         }
     }
 }

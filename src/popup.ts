@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", async (event) => {
             });
         } else {
             console.log(`FIND_DISCUSSIONS_EXTN: Tab url for tab ID ${tab.id} not found`)
+            const div = document.createElement("div");
+            div.innerHTML = `<pre>${fullUrl}</pre><p>is not a valid webpage (http:// or https://). Try browsing around to get results.</p>`
+            document.body.appendChild(div);
         }
     });
 });
