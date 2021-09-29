@@ -37,7 +37,18 @@ export async function search_stack_exchange(url: string, types: string[], sort: 
     for (const subsite of subsites) {
         const fetchURL = `${urlBase}&sort=${sort}&url=${encodeURIComponent(url)}&site=${subsite}`
         const resp = await fetch(fetchURL, fetchGetOptions as any);
-        const stackExchangeResp = await resp.json() as SEResp;
+        const resptext = await resp.text();
+        let stackExchangeResp: SEResp = Object();
+        try {
+            stackExchangeResp = JSON.parse(resptext) as SEResp;
+        } catch {
+            console.log("FIND_DISCUSSIONS_EXTN malformed non-JSON stackexchange response:\n" + resptext)
+            return [];
+        }
+        if (!Object.keys(stackExchangeResp).includes('items')) { // probably malformed response
+            console.log("FIND_DISCUSSIONS_EXTN malformed stackexchange response:\n" + resptext)
+            return [];
+        }
         for (const item of stackExchangeResp.items) {
             if (types.includes(item.item_type) && !noDupes.includes(item.question_id)) {
                 noDupes.push(item.question_id)

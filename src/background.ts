@@ -23,7 +23,7 @@ import {forumPost} from 'index'
 {
     '2020-01-01': {
         'https://example.com': [
-            {forum post 1},
+            forumPost,
             ...
         ]
     }
@@ -38,7 +38,9 @@ let CURR_LARGEST_DISCUSSION = '';
 const getISODate = () => new Date().toISOString().substr(0,10)
 const isDomain = (url: string) => new URL(url).pathname === '/'
 let INIT_ISODATE = getISODate()
-chrome.browserAction.setBadgeBackgroundColor({color: "#666666"}, ()=>{});    
+chrome.browserAction.setBadgeBackgroundColor({color: "#666666"}, ()=>{});
+reCreateMenu([{url: chrome.extension.getURL(''), title: "Find Discussions Extension"} as forumPost]) // Set a default menu
+
 
 // Run on install
 chrome.runtime.onInstalled.addListener(() => {
@@ -53,10 +55,35 @@ chrome.runtime.onMessage.addListener(
             const isoToday = getISODate();
             console.log("Popup is calling background script and sees this extension storage", EXTN_CACHE);
             sendResponse({data: EXTN_CACHE[isoToday][request.url]});
+
         });
         return true;
     }
 );
+
+/*chrome.contextMenus.onClicked.addListener((info, tab: chrome.tabs.Tab) => {
+    console.log("Context menu", info, "tabs", tab)
+    const urlObj = new URL((tab as any).url);
+    const url = urlObj.protocol+'//'+urlObj.host+urlObj.pathname+urlObj.search
+    createMenu(url)
+})*/
+
+
+function reCreateMenu(postList: forumPost[]) {
+    chrome.contextMenus.removeAll(() => {
+        let counter = 0;
+        for (const post of postList) {
+            counter += 1;
+            chrome.contextMenus.create({
+                id: "find_discussions" + counter.toString(),
+                documentUrlPatterns: ["*://*/*"],
+                contexts: ['all'], 
+                onclick: (_, __) => chrome.tabs.create({active: true, url: post.url}),
+                title: post.title
+            });
+        }
+    });
+}
 
 chrome.webRequest.onBeforeRequest.addListener(
     (webRequest) => {
@@ -131,6 +158,7 @@ async function setURLData(url: string) {
             }, (id) => CURR_NOTIFICATION_ID = id)
         }
     }
+    reCreateMenu(EXTN_CACHE[isoToday][url])
 }
 
 async function queryForumAPIs(url: string): Promise<forumPost[]> {
@@ -141,21 +169,12 @@ async function queryForumAPIs(url: string): Promise<forumPost[]> {
     const stackExchangeJsUrl = chrome.runtime.getURL("build/stackexchange.js");
     const stackExchange = await import(stackExchangeJsUrl);
 
-    let all_results: any = [];
     console.log("Querying online APIs for url:" + url)
-    try {
-        const HN_ALGOLIA_DEFAULT_LIMIT = 30
-        const hn_results = await hn.searchHN(url, ["story"], HN_ALGOLIA_DEFAULT_LIMIT);
-        all_results = all_results.concat(hn_results)
-    } catch(err) { console.log("Unable to fetch hacker news results." + err) }
-    try {
-        const reddit_results = await reddit.search_reddit(url, ["post"], "top");
-        all_results = all_results.concat(reddit_results)
-    } catch(err) { console.log("Unable to fetch reddit results." + err) }
-    try {
-        const se_results = await stackExchange.search_stack_exchange(url, ["question", "answer"], "activity", ["stackoverflow"]);
-        all_results = all_results.concat(se_results)
-    } catch(err) { console.log("Unable to fetch stack exchange results." + err) }
+    const HN_ALGOLIA_DEFAULT_LIMIT = 30
+    const hn_results = await hn.searchHN(url, ["story"], HN_ALGOLIA_DEFAULT_LIMIT);
+    const reddit_results = await reddit.search_reddit(url, ["post"], "top");
+    const se_results = await stackExchange.search_stack_exchange(url, ["question", "answer"], "activity", ["stackoverflow"]);
+    let all_results: forumPost[] = [...hn_results, ...reddit_results, ...se_results];
 
     if (all_results.length > 0) {
         // filter out 0 comment discussions

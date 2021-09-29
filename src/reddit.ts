@@ -44,7 +44,17 @@ export async function search_reddit(url: String, type: String, sort: String): Pr
     const match = /window\.___r = (.*);<\/script>/g.exec(pagetext)
     let posts: forumPost[] = []
     if (match !== null) {
-        const data = JSON.parse(match[1])
+        let data;
+        try {
+            data = JSON.parse(match[1])
+        } catch {
+            console.log("FIND_DISCUSSIONS_EXTN malformed non-JSON reddit response:\n" + match[1])
+            return [];
+        }
+        if (!Object.keys(data).includes('posts')) { // probably malformed response
+            console.log("FIND_DISCUSSIONS_EXTN malformed reddit response:\n" + pagetext)
+            return [];
+        }
         for (const page of Object.keys(data['posts']['models'])) {
             const redditPostData: redditPost = data.posts.models[page]
             const created_date = new Date(redditPostData.created).toISOString().substring(0,10)

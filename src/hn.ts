@@ -57,22 +57,33 @@ export async function searchHN(url: string, typesAry: string[], limit: number): 
         "body": `{"query":"\\\"${url}\\\"","analyticsTags":["web"],"page":0,"hitsPerPage":${limit},"minWordSizefor1Typo":4,"minWordSizefor2Typos":8,"advancedSyntax":true,"ignorePlurals":false,"clickAnalytics":true,"minProximity":1,"numericFilters":[],"tagFilters":[${types},[]],"typoTolerance":true,"queryType":"prefixLast","restrictSearchableAttributes":["title","comment_text","url","story_text","author"],"getRankingInfo":true}`,
         "method": "POST",
         "mode": "cors"
-      } as any);
-      const body = await resp.json() as HNPost;
-      let HNPosts: forumPost[] = []
-      // Right now, we're only showing stories
-      let stories = body.hits as HNStory[];
-      for (const hit of stories) {
-          HNPosts.push({
-              type: "post",
-              source: "hackernews",
-              created_date: hit.created_at.substr(0,10),
-              url: "https://news.ycombinator.com/item?id=" + hit["objectID"],
-              title: hit.title,
-              comment_count: hit.num_comments,
-              score: hit.points,
-              is_accepted_answer: false  // Accepted answer is for stack overflow
-          });
-      }
-      return HNPosts
+    } as any);
+    const resptext = await resp.text();
+    let HNPosts: forumPost[] = []
+    let body;
+    try {
+        body = JSON.parse(resptext) as HNPost;
+    } catch {
+        console.log("FIND_DISCUSSIONS_EXTN malformed non-JSON hacker news response:\n" + resptext)
+        return [];
+    }
+    if (!Object.keys(body).includes('hits')) { // probably malformed response
+        console.log("FIND_DISCUSSIONS_EXTN malformed hn.algolia response:\n" + resptext)
+        return [];
+    }
+    // Right now, we're only showing stories
+    let stories = body.hits as HNStory[];
+    for (const hit of stories) {
+        HNPosts.push({
+            type: "post",
+            source: "hackernews",
+            created_date: hit.created_at.substr(0,10),
+            url: "https://news.ycombinator.com/item?id=" + hit["objectID"],
+            title: hit.title,
+            comment_count: hit.num_comments,
+            score: hit.points,
+            is_accepted_answer: false  // Accepted answer is for stack overflow
+        });
+    }
+    return HNPosts
 }

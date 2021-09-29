@@ -33,7 +33,7 @@
         "media/answer.svg"    
     ],
     "manifest_version": 2,
-    "permissions": ["tabs", "notifications", "storage", "webRequest", "*://*/*"],
+    "permissions": ["tabs", "notifications", "storage", "contextMenus", "webRequest", "*://*/*"],
     "author": "Ross Jacobs",
     "name": "Find Discussions",
     "description": "Browser extension to find discussions of your current page",
