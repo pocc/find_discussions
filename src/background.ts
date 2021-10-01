@@ -35,6 +35,11 @@ let EXTN_CACHE: globalCache = Object()
 let URLS_NOTIFIED: string[] = [] // Don't notify twice for the same URL
 let CURR_NOTIFICATION_ID = '';
 let CURR_LARGEST_DISCUSSION = '';
+let LAST_URL = '';
+let SE_QUOTA_REACHED_DATES: string[] = []
+// Adapted from https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript
+const genRand8Hex = () => [...Array(8)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+const formatLog = (requestID: string, msg: string, data: any) => console.log(`FDE|${new Date().getTime()}|${requestID}|${msg}: `, data) 
 const MIN_COMMENT_COUNT = 2  // One comment posts are usually the poster or a bot commenting and not interesting
 const getISODate = () => new Date().toISOString().substr(0,10)
 const isBareDomain = (url: string) => new URL(url).pathname === '/'
@@ -45,40 +50,52 @@ reCreateMenu([{url: chrome.runtime.getURL(''), title: "Loading... right click ag
 // Run on install
 chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.sync.set({"install_unixtime": new Date().getTime()}, () => {
-        console.log('Find Discussions extension has been installed.');
+        formatLog('0', 'Find Discussions extension has been installed at', chrome.runtime.getURL(''));
     });
 });
 
 // When the tab changes, change the lookup url for the 
 chrome.tabs.onActivated.addListener((_)=> {
     // Would use tabInfo, but it has tabID and windowID, not URL, so just query for it again
-    updateWithActiveTab();
+    const requestID = genRand8Hex()    
+    updateWithActiveTab(requestID);
 })
 
 chrome.tabs.onUpdated.addListener((_, changeInfo, tab) => {
+    const requestID = genRand8Hex()
     const url = changeInfo.url || tab.url || ""
+    formatLog(requestID, "Active tab updated and is now",  url);
     if (url) {
-        setURLData(url)
+        setURLData(requestID, url)
     }
 });
 
 chrome.runtime.onMessage.addListener(
     (request, _, sendResponse) => {
-        if (Object.keys(request).includes('event') && request.event === "popup clicked") {
-            updateWithActiveTab().then((url) => {
-                console.log(url, EXTN_CACHE)
-                sendResponse({
-                    url: url,
-                    forumposts: EXTN_CACHE[getISODate()][url],
-                })
-            });
+        const requestID = genRand8Hex()
+        formatLog(requestID, "Got message from popup script", request)
+        if (Object.keys(request).includes('event')) {
+            if (request.event === "popup clicked") {
+                updateWithActiveTab(requestID).then((url) => {
+                    formatLog(requestID, "Popup Clicked; Extension Cache", EXTN_CACHE)
+                    sendResponse({
+                        forumposts: EXTN_CACHE[getISODate()][url],
+                    })
+                });
+            } else if (request.event === "new url in input") {
+                setURLData(requestID, request.url).then(() => {
+                    sendResponse({
+                        forumposts: EXTN_CACHE[getISODate()][request.url],
+                    })
+                });
+            }
         }
         return true;
     }
 );
 
 // This will be triggered on popup or user changes tabs
-async function updateWithActiveTab(): Promise<string> {
+async function updateWithActiveTab(requestID: string): Promise<string> {
     const queryOptions = { active: true, currentWindow: true };
     const tabs: chrome.tabs.Tab[] = await new Promise((resolve, _) => {
         chrome.tabs.query(queryOptions, (tabs) => {
@@ -87,12 +104,16 @@ async function updateWithActiveTab(): Promise<string> {
     });
     const tab = tabs[0];
     const url = tab.url || tab.pendingUrl || "";  // If url isn't available, page is still loading
-    await setURLData(url)
+    if (url !== LAST_URL) {
+        formatLog(requestID, "Active tab changed to", url)
+        await setURLData(requestID, url)
+    }
     return url
 }
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-    console.log("context menus were clicked", info, tab);
+    const requestID = genRand8Hex()
+    formatLog(requestID, "context menus were clicked and data received", {info: info, tab: tab});
 });
 
 /* This creates a context menu when you right click on the page 
@@ -135,10 +156,12 @@ so that this extension can query URLs as fast possible */
 chrome.webRequest.onBeforeRequest.addListener(
     (webRequest) => {
         // No feedback loops (don't react to requests made by this extension)
+        const requestID = genRand8Hex()
         const inspectingOwnTraffic = chrome.runtime.getURL('') === (webRequest.initiator || "") + "/"
         if (!inspectingOwnTraffic) {
-            console.log(`${chrome.runtime.getURL('')}: Intercepted web request from "${webRequest.initiator}" for "${webRequest.url}"`, webRequest);
-            setURLData(webRequest.url) // async
+            const msg = `${chrome.runtime.getURL('')}: Intercepted web request from "${webRequest.initiator}" for "${webRequest.url}"`
+            formatLog(requestID, msg, webRequest);
+            setURLData(requestID, webRequest.url) // async
         }
     },
     {
@@ -175,19 +198,22 @@ function setExtnCache(isoToday: string, url: string, forumPosts: forumPost[]) {
 }
 
 // For a given URL, get data, set it to global cache, and return url data
-async function setURLData(url: string) {
+async function setURLData(requestID: string, url: string) {
+    if (url === LAST_URL) {
+        return; // Don't spam this function if chrome is sending too many of the same event
+    }
     const isoToday = getISODate();
-    const isCached = Object.keys(EXTN_CACHE).length > 0 && Object.keys(EXTN_CACHE[isoToday]).includes(url)
+    const isCached = EXTN_CACHE && Object.keys(EXTN_CACHE).length > 0 && Object.keys(EXTN_CACHE[isoToday]).includes(url)
     let results;
     if (isCached) {
-        console.log(`Using cache for "${url}".`)
+        formatLog(requestID, "Using cache for",  url)
         results = EXTN_CACHE[isoToday][url]
     } else {
         chrome.browserAction.setBadgeText({text: "?"}); // Get rid of stale badge num ASAP
-        results = await queryForumAPIs(url);
+        results = await queryForumAPIs(requestID, url);
         setExtnCache(isoToday, url, results)
     }
-    console.log(`${chrome.runtime.getURL('')} storage :`, EXTN_CACHE)
+    formatLog(requestID, `${chrome.runtime.getURL('')} storage`, EXTN_CACHE)
     // Set the number in the badge in the icon in the extension bar
     chrome.browserAction.setBadgeText({text: results.length.toString()}, ()=>{});
     const hasDiscussions = EXTN_CACHE[isoToday][url].length > 0
@@ -212,32 +238,47 @@ async function setURLData(url: string) {
             }, (id) => CURR_NOTIFICATION_ID = id)
         }
     }
-    await reCreateMenu(EXTN_CACHE[isoToday][url])
+    LAST_URL = url;
 }
 
 /* Get data from Hacker News, 
 */
-async function queryForumAPIs(url: string): Promise<forumPost[]> {
-    const hnJsUrl = chrome.runtime.getURL("build/hn.js");
+async function queryForumAPIs(requestID: string, url: string): Promise<forumPost[]> {
+    const hnJsUrl = chrome.runtime.getURL("build/crawlers/hn.js");
     const hn = await import(hnJsUrl);
-    const redditJsUrl = chrome.runtime.getURL("build/reddit.js");
+    const redditJsUrl = chrome.runtime.getURL("build/crawlers/reddit.js");
     const reddit = await import(redditJsUrl);
-    const stackExchangeJsUrl = chrome.runtime.getURL("build/stackexchange.js");
+    const stackExchangeJsUrl = chrome.runtime.getURL("build/crawlers/stackexchange.js");
     const stackExchange = await import(stackExchangeJsUrl);
+    const lobstersJsUrl = chrome.runtime.getURL("build/crawlers/lobsters.js");
+    const lobsters = await import(lobstersJsUrl);
+    // const wikimediaJsUrl = chrome.runtime.getURL("build/crawlers/wikimedia.js");
+    // const wikimedia = await import(wikimediaJsUrl);
 
-    console.log("Querying online APIs for url:" + url)
-    const HN_ALGOLIA_DEFAULT_LIMIT = 30
-    const hn_results = await hn.searchHN(url, ["story"], HN_ALGOLIA_DEFAULT_LIMIT);
+    formatLog(requestID, "Querying online APIs for url", url)
+    const DEFAULT_LIMIT = 30
+    const hn_results = await hn.searchHN(url, ["story"], DEFAULT_LIMIT);
     const reddit_results = await reddit.search_reddit(url, ["post"], "top");
-    const se_results = await stackExchange.search_stack_exchange(url, ["question", "answer"], "activity", ["stackoverflow"]);
-    let all_results: forumPost[] = [...hn_results, ...reddit_results, ...se_results];
+    const no_se_errs = !SE_QUOTA_REACHED_DATES.includes(getISODate())
+    let se_results = [];
+    if (no_se_errs) {
+        const se_results_all = await stackExchange.search_stack_exchange(url, ["question", "answer"], "activity", ["stackoverflow"]);
+        se_results = se_results_all[0]
+        if (se_results_all[1] !== '') {
+            formatLog(requestID, "Triggered stack exchange error", se_results_all[1])
+            SE_QUOTA_REACHED_DATES.push(getISODate())
+        }
+    }
+    //const wiki_results = await wikimedia.search_wikimedia(url, DEFAULT_LIMIT);
+    const lobsters_results = await lobsters.search_lobsters(url);
+    let all_results: forumPost[] = [...hn_results, ...reddit_results, ...se_results, ...lobsters_results];
 
     if (all_results.length > 0) {
         // filter out 0 comment discussions
-        all_results = all_results.filter((r: any) => r.comment_count >= MIN_COMMENT_COUNT);
+        all_results = all_results.filter((r: forumPost) => r.source === 'wikimedia' || r.comment_count >= MIN_COMMENT_COUNT);
         // sort descending
-        all_results = all_results.sort((a: any, b: any) => {return b.comment_count - a.comment_count});
+        all_results = all_results.sort((a: forumPost, b: forumPost) => {return b.comment_count - a.comment_count});
     }
-    console.log(all_results)
+    formatLog(requestID, "all results", all_results)
     return all_results
 }

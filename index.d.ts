@@ -1,14 +1,14 @@
 // d.ts file for this project
 export type forumPost = {
     created_date: string;
-    source: "hackernews" | "reddit" | "stackexchange"
-    sub_source: string, // subreddit or stackexchange site
+    source: "hackernews" | "reddit" | "stackexchange" | "lobsters" | "wikimedia"
+    sub_source?: string, // subreddit or stackexchange site
     title: string;
-    type: "post" | "comment" | "story" | "question" | "answer" | "extn loading";
+    type: "post" | "comment" | "story" | "question" | "answer" | "article" | "extn loading";
     url: string;
     score: number;
     comment_count: number;
-    is_accepted_answer: boolean;
+    is_accepted_answer?: boolean;
 }
 
 export type Settings = {
@@ -31,6 +31,24 @@ export interface CrxExtnResp extends CrxExtnMsg {
     results: forumPost[];
     error?: string;
     errorCode?: number
+}
+
+export interface WikiResp {
+    batchcomplete: string;
+    query: {
+        searchinfo: {
+            totalhits: number;
+        };
+        search: ({
+            ns: number;
+            title: string;
+            pageid: number;
+            size: number;
+            wordcount: number;
+            snippet: string;
+            timestamp: string;
+        })[];
+    }  
 }
 
 // node-fetch response

@@ -35,11 +35,12 @@ fetch("https://uj5wyc0l7x-dsn.algolia.net/1/indexes/Item_production/query?x-algo
   "mode": "cors"
 });
 */
-import {forumPost, HNPost, HNStory} from 'index';
+import {forumPost, HNPost, HNStory} from '../../index';
 
 export async function searchHN(url: string, typesAry: string[], limit: number): Promise<forumPost[]> {
     const types = `"${typesAry.join('", "')}"`
-    const resp = await fetch("https://uj5wyc0l7x-dsn.algolia.net/1/indexes/Item_production/query?x-algolia-agent=Algolia%20for%20JavaScript%20(4.0.2)%3B%20Browser%20(lite)&x-algolia-api-key=8ece23f8eb07cd25d40262a1764599b1&x-algolia-application-id=UJ5WYC0L7X", {
+    const algolia_url = "https://uj5wyc0l7x-dsn.algolia.net/1/indexes/Item_production/query?x-algolia-agent=Algolia%20for%20JavaScript%20(4.0.2)%3B%20Browser%20(lite)&x-algolia-api-key=8ece23f8eb07cd25d40262a1764599b1&x-algolia-application-id=UJ5WYC0L7X"
+    const resp = await fetch(algolia_url, {
         "headers": {
           "accept": "*\/*",
           "accept-language": "en-US,en;q=0.9",
@@ -72,11 +73,12 @@ export async function searchHN(url: string, typesAry: string[], limit: number): 
         return [];
     }
     // Right now, we're only showing stories
+    console.log("Fetching hn.algolia for ", url)
     let stories = body.hits as HNStory[];
     for (const hit of stories) {
         // Source URL of post should match the url we are searching for
         // Searching for "chrome://extensions" can get a search for "chrome extensions"
-        if (hit.url === url) {
+        if (hit.url && hit.url.includes(url) || hit.title && hit.title.includes(url) || hit.story_text && (hit.story_text as string).includes(url)) {
             HNPosts.push({
                 type: "post",
                 source: "hackernews",

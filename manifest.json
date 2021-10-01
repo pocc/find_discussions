@@ -18,9 +18,11 @@
         "default_title": "Backlinks to discussions"
     },
     "web_accessible_resources": [
-        "build/hn.js",
-        "build/reddit.js",
-        "build/stackexchange.js",
+        "build/crawlers/hn.js",
+        "build/crawlers/reddit.js",
+        "build/crawlers/stackexchange.js",
+        "build/crawlers/wikimedia.js",
+        "build/crawlers/lobsters.js",
         "build/settings.js",
         "build/utils.js",
         "media/hackernews.ico",

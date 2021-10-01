@@ -10,11 +10,24 @@ document.addEventListener("DOMContentLoaded", async (event) => {
         const activeURL = tabs[0].url;
         (document.getElementById("filter") as HTMLInputElement).value = activeURL || "no active tab url";
     });
-    chrome.runtime.sendMessage({event: "popup clicked"}, async (resp: {url: string, forumposts: forumPost[]}) => {
+    const inputEl = document.getElementById('filter') as HTMLInputElement;
+    inputEl.addEventListener('submit', newURLInInput);
+    popupClicked()
+});
+
+function newURLInInput() {
+    const newURL = (document.getElementById('filter') as HTMLInputElement).value;
+    chrome.runtime.sendMessage({event: "new url in input", url: newURL}, async (resp: {forumposts: forumPost[]}) => {
         await runExtn(resp.forumposts);
     });
-});
-    
+}
+
+function popupClicked() {
+    chrome.runtime.sendMessage({event: "popup clicked", url: ""}, async (resp: {forumposts: forumPost[]}) => {
+        await runExtn(resp.forumposts);
+    });
+}
+
 async function runExtn(all_results: forumPost[]) {
     // Dynamic imports per https://stackoverflow.com/a/53033388/
     const utilsJsUrl = chrome.runtime.getURL("build/utils.js");

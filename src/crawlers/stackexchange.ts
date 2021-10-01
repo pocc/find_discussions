@@ -26,11 +26,11 @@ with the possibility of using 5 quotas.
 */
 
 'use strict';
-import {fetchGetOptions} from './utils.js'
-import { SEResp, forumPost, SEAnswer, SEQuestion } from 'index.js';
+import {fetchGetOptions} from '../utils.js'
+import { SEResp, forumPost, SEAnswer, SEQuestion } from '../../index';
 
-
-export async function search_stack_exchange(url: string, types: string[], sort: string, subsites: string[]): Promise<forumPost[]> {
+// Returns results an error if there is one
+export async function search_stack_exchange(url: string, types: string[], sort: string, subsites: string[]): Promise<[forumPost[], string]> {
     const urlBase = "https://api.stackexchange.com/2.3/search/excerpts?order=desc"
     let posts: forumPost[] = []
     let noDupes: number[] = []
@@ -44,11 +44,11 @@ export async function search_stack_exchange(url: string, types: string[], sort: 
             stackExchangeResp = JSON.parse(resptext) as SEResp;
         } catch {
             console.log("FIND_DISCUSSIONS_EXTN malformed non-JSON stackexchange response:\n" + resptext)
-            return [];
+            return [[], resptext];
         }
         if (!Object.keys(stackExchangeResp).includes('items')) { // probably malformed response
             console.log("FIND_DISCUSSIONS_EXTN malformed stackexchange response:\n" + resptext)
-            return [];
+            return [[], resptext];
         }
         for (const item of stackExchangeResp.items) {
             const isCorrectType = types.includes(item.item_type)
@@ -79,5 +79,5 @@ export async function search_stack_exchange(url: string, types: string[], sort: 
             }
         }
     }
-    return posts 
+    return [posts, '']
 }

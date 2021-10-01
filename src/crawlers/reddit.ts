@@ -33,8 +33,8 @@ It's also possible to limit it to 100 instead of default 25
 'use strict';
 //const snoowrap = require('snoowrap');
 //require('dotenv').config()
-import {forumPost, redditPost} from 'index';
-import {fetchGetOptions} from './utils.js';
+import {forumPost, redditPost} from '../../index';
+import {fetchGetOptions} from '../utils.js';
 
 
 export async function search_reddit(url: String, type: String, sort: String): Promise<forumPost[]> {

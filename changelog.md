@@ -39,21 +39,27 @@ This will be accurate on every commit.
 ### Nice to have
 
 * [ ] Allow for search in comments
-
 * [ ] Add support for wikipedia (240m)
-* [ ] WordPress (www.wordpress.org)
-* [ ] Medium (www.medium.com)
-* [ ] Substack
 * [ ] LinkedIn (www.linkedin.com)
 * [ ] Add support for github READMEs/issues/pull requests (240m)
 * [ ] Add support for twitter (240m)
-* [ ] Add support for tumblr
-* [ ] Add support for facebook
-* [ ] Add support for Instagram
 
 ### Marginal
 
+* [ ] WordPress (www.wordpress.org)
+* [ ] Medium (www.medium.com)
+* [ ] Substack
+* [ ] Add support for tumblr
+* [ ] Add support for facebook
+* [ ] Add support for Instagram
 * [ ] Wix (www.wix.com)
 * [ ] Weebly (www.weebly.com)
 * [ ] Ghost (www.ghost.org)
 * [ ] Blogger (www.blogger.com)
+* [ ] toptal.com
+* [ ] wired
+* [ ] dzone
+* [ ] hackaday
+* [ ] slashdot
+* [ ] techmeme
+
